@@ -1,0 +1,64 @@
+package build
+
+import mill._
+import scalalib._
+import scalajslib._
+import $ivy.`io.github.nafg.millbundler::millbundler::0.2.0`
+import $ivy.`com.github.lolgab::mill-scalablytyped::0.1.15`
+import com.github.lolgab.mill.scalablytyped._
+import io.github.nafg.millbundler._
+import mill.scalajslib.api._
+
+
+object Versions {
+  val laminar = "17.2.1"
+  val scala = "3.6.4"
+  val scalajs = "1.18.2"
+  val scalajsdom = "2.2.0"
+}
+
+trait Base extends ScalaJSModule {
+  def scalaVersion = Versions.scala
+  def scalaJSVersion = Versions.scalajs
+}
+
+
+object `package` extends RootModule {
+  object `scalablytyped-module` extends Base with ScalablyTyped
+
+  object frontend extends ScalaJSRollupModule with Base {
+
+    def ivyDeps = Agg(
+      ivy"com.raquo::laminar::${Versions.laminar}",
+      ivy"org.scala-js::scalajs-dom::${Versions.scalajsdom}",
+
+    )
+    def moduleKind = ModuleKind.ESModule
+    def moduleDeps = Seq(`scalablytyped-module`)
+
+    def scalacOptions: T[Seq[String]] = Seq(
+      "-deprecation",
+      "-Xfatal-warnings",
+      "-Wvalue-discard",
+      "-Wsafe-init",
+      "-Wnonunit-statement",
+      "-Wconf:msg=(unused.*value|discarded.*value|pure.*statement):error",
+      "-Yexplicit-nulls",
+      "-language:strictEquality"
+    )
+
+    // custom bundling step to /dist/
+    def devBundleTauri = Task {
+      val bundles = devBundle()
+      val jsPath = bundles.head.path / os.up
+      val targetPath = jsPath / os.up / os.up / os.up / "dist"
+      val target = targetPath / "main.js"
+      os.copy.over(jsPath / "out-bundle.js", target)
+      val sourceMap = jsPath / "out-bundle.js.map"
+      if (os.exists(sourceMap)) {
+        os.copy.over(sourceMap, targetPath / "main.js.map")
+      }
+      PathRef(target)
+    }
+  }
+}
