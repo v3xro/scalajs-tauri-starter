@@ -1,20 +1,24 @@
+//| mvnDeps:
+//| - io.github.nafg.millbundler::millbundler::0.3.0-6-1c8349-DIRTY-SNAPSHOT
+//| - com.github.lolgab::mill-scalablytyped::0.4.0
+// plugins declaration in yaml format
+
 package build
 
 import mill._
+import mill.api.BuildCtx
+import mill.scalajslib.api._
 import scalalib._
 import scalajslib._
-import $ivy.`io.github.nafg.millbundler::millbundler::0.2.0`
-import $ivy.`com.github.lolgab::mill-scalablytyped::0.1.15`
 import com.github.lolgab.mill.scalablytyped._
 import io.github.nafg.millbundler._
-import mill.scalajslib.api._
 
 
 object Versions {
   val laminar = "17.2.1"
-  val scala = "3.6.4"
-  val scalajs = "1.18.2"
-  val scalajsdom = "2.2.0"
+  val scala = "3.7.3"
+  val scalajs = "1.20.1"
+  val scalajsdom = "2.8.1"
 }
 
 trait Base extends ScalaJSModule {
@@ -23,14 +27,14 @@ trait Base extends ScalaJSModule {
 }
 
 
-object `package` extends RootModule {
+object `package` extends Module {
   object `scalablytyped-module` extends Base with ScalablyTyped
 
   object frontend extends ScalaJSRollupModule with Base {
 
-    def ivyDeps = Agg(
-      ivy"com.raquo::laminar::${Versions.laminar}",
-      ivy"org.scala-js::scalajs-dom::${Versions.scalajsdom}",
+    def mvnDeps = Seq(
+      mvn"com.raquo::laminar::${Versions.laminar}",
+      mvn"org.scala-js::scalajs-dom::${Versions.scalajsdom}",
 
     )
     def moduleKind = ModuleKind.ESModule
@@ -47,18 +51,21 @@ object `package` extends RootModule {
       "-language:strictEquality"
     )
 
-    // custom bundling step to /dist/
+    // custom bundling step to /dist/ - suboptimal
     def devBundleTauri = Task {
-      val bundles = devBundle()
-      val jsPath = bundles.head.path / os.up
-      val targetPath = jsPath / os.up / os.up / os.up / "dist"
-      val target = targetPath / "main.js"
-      os.copy.over(jsPath / "out-bundle.js", target)
-      val sourceMap = jsPath / "out-bundle.js.map"
-      if (os.exists(sourceMap)) {
-        os.copy.over(sourceMap, targetPath / "main.js.map")
+      // bypass sandboxing for now
+      BuildCtx.withFilesystemCheckerDisabled {
+        val bundles = devBundle()
+        val jsPath = bundles.head.path / os.up
+        val targetPath = jsPath / os.up / os.up / os.up / "dist"
+        val target = targetPath / "main.js"
+        os.copy.over(BuildCtx.watch(jsPath / "out-bundle.js"), target, createFolders = true)
+        val sourceMap = jsPath / "out-bundle.js.map"
+        if (os.exists(sourceMap)) {
+          os.copy.over(BuildCtx.watch(sourceMap), targetPath / "main.js.map")
+        }
+        PathRef(target)
       }
-      PathRef(target)
     }
   }
 }

@@ -12,6 +12,8 @@ Then:
 * `mill -w frontend.devBundleTauri` (to compile the frontend and watch the scala files for changes)
 * `cargo tauri dev` (to run the tauri desktop app)
 
+Currently, you need a custom version of the mill bundler until https://github.com/nafg/mill-bundler/pull/72 is merged.
+
 ## Why?
 
 To build apps for mobile platforms, without needing to go too platform-specific, and without touching 

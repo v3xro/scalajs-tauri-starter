@@ -30,7 +30,9 @@ object HelloWorld:
         onClick.compose(
           _.mapToUnit
             .withCurrentValueOf(nameVar.signal)
-            .flatMapSwitch(name => EventStream.fromJsPromise(tauriCall[String]("greet", StringDictionary("name" -> name))))
+            .flatMapSwitch(name =>
+              EventStream.fromJsPromise(tauriCall[String]("greet", StringDictionary("name" -> name)))
+            )
         ) --> tauriVar
       ),
       p(text <-- tauriVar)
