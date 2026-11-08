@@ -4,15 +4,13 @@ A tiny [tauri] application template using [scalajs] and [laminar] frontend libra
 
 ## Running
 
-Install [mill] and [tauri] (using the `cargo` method e.g. `cargo install tauri`)
+Install [mill] and [tauri] cli (using the `cargo` method e.g. `cargo install tauri-cli`)
 
 Then:
 
-* `npm install` (required currently because the scalablytyped plugin does not grab node_modules by itself)
+* `npm install` (required currently because the scalablytyped plugin does not grab `node_modules` by itself)
 * `mill -w frontend.devBundleTauri` (to compile the frontend and watch the scala files for changes)
 * `cargo tauri dev` (to run the tauri desktop app)
-
-Currently, you need a custom version of the mill bundler until https://github.com/nafg/mill-bundler/pull/72 is merged.
 
 ## Why?
 

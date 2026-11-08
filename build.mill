@@ -1,6 +1,6 @@
 //| mvnDeps:
-//| - io.github.nafg.millbundler::millbundler::0.3.0-6-1c8349-DIRTY-SNAPSHOT
-//| - com.github.lolgab::mill-scalablytyped::0.4.0
+//| - io.github.nafg.millbundler::millbundler::0.4.0
+//| - com.github.lolgab::mill-scalablytyped::0.4.2
 // plugins declaration in yaml format
 
 package build
@@ -16,8 +16,8 @@ import io.github.nafg.millbundler._
 
 object Versions {
   val laminar = "17.2.1"
-  val scala = "3.7.3"
-  val scalajs = "1.20.1"
+  val scala = "3.9.0"
+  val scalajs = "1.22.0"
   val scalajsdom = "2.8.1"
 }
 
@@ -42,7 +42,7 @@ object `package` extends Module {
 
     def scalacOptions: T[Seq[String]] = Seq(
       "-deprecation",
-      "-Xfatal-warnings",
+      "-Werror",
       "-Wvalue-discard",
       "-Wsafe-init",
       "-Wnonunit-statement",
